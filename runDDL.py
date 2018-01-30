@@ -100,9 +100,11 @@ for line in ddlfile:
 print(ddlContents)
 printDivideLine()
 
-mySocket= socket.socket()
+
 print("Beginning Connection to Nodes")
 for node in listOfNodes:
+	mySocket= socket.socket()
+	succeeded=0
 	try:
 		print("Connecting to Node#:"+node.nodeNumber)
 		splitHost = node.hostname.split(":")
@@ -112,6 +114,22 @@ for node in listOfNodes:
 		data = mySocket.recv(4096).decode()
 		print("Node["+node.nodeNumber+"] Results:"+data)
 		mySocket.close()
+		if("Success" in data):
+			succeeded=1
 	except:
 		print("Failed, unable to connect to node#"+node.nodeNumber)
+	if(succeeded):	#if the command was successful make note in the catalog
+		try:
+			mySocket= socket.socket()
+			print("Pushing Info To Catalog")
+			splitHost = catalog.hostname.split(":")
+			print("IPAddress:"+splitHost[0]+" || Port:"+ splitHost[1])
+			mySocket.connect((splitHost[0],int(splitHost[1].split("/")[0])))
+			mySocket.send(str(node).encode())
+			mySocket.recv(4096)
+			mySocket.send(ddlContents.encode())
+			data = mySocket.recv(4096).decode()
+			mySocket.close()
+		except socket.error as e:
+			print("Failed, Unable to connect to catalog" + str(e)) 
 

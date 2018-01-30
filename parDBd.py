@@ -29,7 +29,7 @@ while quit == 0:
 	try: 
 		dbConnection.execute(str(data))
 		dbConnection.commit()
-		message = "SQL Command Succeeded"
+		message = "SQL Command Succeeded: Success"
 		conn.send(message.encode())
 	except(sqlite3.Error) as e: 
 		print("Failed" + str(e))
