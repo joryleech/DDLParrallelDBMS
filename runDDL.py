@@ -13,7 +13,7 @@ class Node:
 	def __init__(self,number):
 		self.nodeNumber=number
 	def __str__(self):
-		return "Node#:"+self.nodeNumber+"\nDriver:"+self.driver+"\nhostname:"+self.hostname
+		return "Node#:"+str(self.nodeNumber)+"\nDriver:"+str(self.driver)+"\nhostname:"+str(self.hostname)
 ######
 #Name: Print Divide Line
 #Function: Prints a single line across the screen to improve readability
@@ -21,13 +21,18 @@ class Node:
 ######
 def printDivideLine():
 	print("-------------------------------------------")
+
+#Catalog node arbitrary number, since not a regular node. 
+global catalog 
+catalog = Node(-1)
+
 ######
 #Name: Set Nodes
 #Function: Takes information and sets node objects to the proper values
 #
 ######
 def setNodes(listOfNodes, nodeID, infoType, value):
-	IDExists=0
+	IDExists=0 #If node doesn't exist create the node
 	for item in listOfNodes:
 		if(item.nodeNumber==nodeID):
 			currentNode=item
@@ -41,6 +46,16 @@ def setNodes(listOfNodes, nodeID, infoType, value):
 		currentNode.driver=value
 	if(infoType=="hostname"):
 		currentNode.hostname=value
+######
+#Name: Set Nodes
+#Function: As Set Nodes but for global catalog
+#
+######
+def setCatalog(infoType, value):
+	if(infoType=="driver"):
+		catalog.driver=value
+	if(infoType=="hostname"):
+		catalog.hostname=value
 
 #Manages Parameters for the program, 
 #Arg1 = clustercfg file
@@ -55,18 +70,25 @@ print("ddlfile="+ddlfile)
 print("Reading ClusterCFG File")
 clustercfg = open(clustercfg,"r")
 listOfNodes=[]
+
 #Parses the clustercfg file for pertinant information about regular nodes.
 for line in clustercfg:
 	if(line!="\n"):
 		temp = line.split("=")
 		tempvalue=temp[1].rstrip()
-		tempnode=re.findall(r'\d+', temp[0].split(".")[0])[0]
 		tempinfo=temp[0].split(".")[1].rstrip()
-		setNodes(listOfNodes,tempnode,tempinfo,tempvalue)
+		if("catalog" in temp[0]):
+			setCatalog(tempinfo,tempvalue)
+		else:
+			tempnode=re.findall(r'\d+', temp[0].split(".")[0])[0]
+			setNodes(listOfNodes,tempnode,tempinfo,tempvalue)
 clustercfg.close()
 printDivideLine()
 
 #Reads DDL into memory so that it may be sent later. Uses concatenation to avoid readline constraints.
+print("Catalog:")
+print(catalog)
+print("Nodes:")
 for item in listOfNodes:
 	print(item)
 printDivideLine()
