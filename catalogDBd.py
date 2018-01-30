@@ -30,11 +30,11 @@ while quit == 0:
 	conn,addr = mySocket.accept()
 	print("Server Connection From "+ str(addr))
 	
-	NodeData = conn.recv(4096).decode()
-	print("Server Recieved Node Data:" + str(NodeData))
-	mySocket.send(("Recieved").encode())
-	DDLData = conn.recv(4096).decode()
-	mySocket.send(("Recieved").encode())
+	data = conn.recv(4096).decode()
+	dataSplit=data.split("\n&\n")
+	DDLData=dataSplit[1]
+	NodeData=dataSplit[0]
+	print("Server Recieved Full-Data:" + str(data))
 	print("Server Recieved DDL Data:" + str(DDLData))
 	if(str(data).rstrip=="quit"):
 		quit=1
@@ -50,13 +50,20 @@ while quit == 0:
 				break
 			if(word=="TABLE"):
 				foundWord=1
+		for sent in NodeData.split("\n"):
+			sentT=sent.split(":")
+			if(sentT[0]=="Driver"):
+				nodedriver=sentT[1]
+			if(sentT[0]=="hostname"):
+				nodeurl=sentT[1]
+		print("tname:"+tname.split("(")[0]+"\nNodeURL:"+nodeurl+"\nnodeDriver:"+nodedriver)
 		sql = "INSERT INTO DTABLES(tname, nodedriver, nodeurl, nodeuser, nodepasswd,partmtd,nodeid,partcol, partparam1, partparam2) VALUES(?,?,?,?,?,?,?,?,?,?)"
+		dbConnection.execute(sql,[tname,nodedriver,nodeurl,None,None,None,None,None,None,None])
 		message = "SQL Command Succeeded: Success"
-		conn.send(message.encode())
+		print("The Insert Was Performed Successfully")
 	except(sqlite3.Error) as e: 
 		print("Failed" + str(e))
 		message = "SQL Command Failed:\n"+str(e)
-		conn.send(message.encode())
 	conn.close()
 dbConnection.close()
 

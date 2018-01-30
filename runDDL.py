@@ -125,9 +125,8 @@ for node in listOfNodes:
 			splitHost = catalog.hostname.split(":")
 			print("IPAddress:"+splitHost[0]+" || Port:"+ splitHost[1])
 			mySocket.connect((splitHost[0],int(splitHost[1].split("/")[0])))
-			mySocket.send(str(node).encode())
-			mySocket.recv(4096)
-			mySocket.send(ddlContents.encode())
+			toSend = str(node)+"\n&\n"+ddlContents
+			mySocket.send(toSend.encode())
 			data = mySocket.recv(4096).decode()
 			mySocket.close()
 		except socket.error as e:
