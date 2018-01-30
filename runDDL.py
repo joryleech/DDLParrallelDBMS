@@ -36,9 +36,9 @@ ddlfile = sys.argv[2]
 print("ClusterCFG="+clustercfg)
 print("ddlfile="+ddlfile)
 print("Reading ClusterCFG File")
-ddlfile = open(ddlfile,"r")
+clustercfg = open(clustercfg,"r")
 listOfNodes=[]
-for line in ddlfile:
+for line in clustercfg:
 	if(line!="\n"):
 		temp = line.split("=")
 		tempvalue=temp[1].rstrip()
@@ -46,9 +46,24 @@ for line in ddlfile:
 		tempinfo=temp[0].split(".")[1].rstrip()
 		setNodes(listOfNodes,tempnode,tempinfo,tempvalue)
 
-ddlfile.close()
+clustercfg.close()
 printDivideLine()
 for item in listOfNodes:
 	print(item)
 printDivideLine()
+print("Reading DDL to Memory")
+ddlContents =""
+ddlfile = open(ddlfile,"r")
+for line in ddlfile:
+	ddlContents+=line;
+print(ddlContents)
+printDivideLine()
+mySocket= socket.socket()
+print("Beginning Connection to Nodes")
+for node in listOfNodes:
+	print("Connecting to Node#:"+node.nodeNumber)
+	splitHost = node.hostname.split(":")
+	print("IPAddress:"+splitHost[0]+" || Port:"+ splitHost[1])
+	mySocket.connect((splitHost[0],int(splitHost[1].split("/")[0])))
+
 
